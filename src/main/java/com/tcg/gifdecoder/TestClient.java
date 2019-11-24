@@ -7,7 +7,7 @@ import java.nio.file.Files;
 public class TestClient {
 
     public static void main(String[] args) throws IOException {
-        File file = new File("C:\\Users\\tcgdeploy\\Pictures\\sample_1.gif");
+        File file = new File(args[0]);
         new GIF(Files.readAllBytes(file.toPath()));
     }
 

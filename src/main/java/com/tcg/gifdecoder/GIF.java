@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GIF {
 
@@ -267,16 +269,49 @@ public class GIF {
                 System.out.println(clearCode);
                 System.out.println(endOfInformationCode);
                 cursor++;
+                int code;
+                int bitIndex = 0;
+                int firstCodeSize = LZWMinCodeSize + 1;
                 for (int i = 0; i < bytesFollow; i++) {
-                    System.out.println(Integer.toHexString(cursorByte()));
-                    cursor++;
+
+                    System.out.println(readBits(fileBytes, cursor, bitIndex, LZWMinCodeSize));
+
                 }
+                cursor += bytesFollow;
             }
             cursor++;
         }
 
 
 
+    }
+
+    private static int readBits(byte[] bytes, int start, int bitIndex, int n) {
+        int result = 0;
+        for(int i = 0; i < n; i++) {
+            result = ((result << 1) | readBit(bytes, start, bitIndex + i));
+        }
+        return result;
+    }
+
+    private static byte readBit(byte[] bytes, int start, int bitIndex) {
+        int byteIndex = bitIndex / 8;
+        int bitShift = bitIndex % 8;
+        int mask = 0x80;
+        return (byte)((bytes[start + byteIndex] & (mask >> bitShift)) >> (7-bitShift));
+    }
+
+    private static String byteArrayToBinaryString(byte[] bytes, int offset, int length) {
+        if(offset + length >= bytes.length) throw new IllegalArgumentException();
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < length; i++) {
+            int b = bytes[offset + i] & 0xFF;
+            String binaryString = String.format("%8s", Integer.toBinaryString(b)).replace(' ', '0');
+            sb.append(binaryString);
+        }
+        Pattern p = Pattern.compile("(.{4})", Pattern.DOTALL);
+        Matcher m = p.matcher(sb.toString());
+        return m.replaceAll("$1" + " ");
     }
 
 }
